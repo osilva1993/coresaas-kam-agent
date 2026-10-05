@@ -50,3 +50,73 @@ graph TD
     F -->|Prompt Estruturado| G[🧠 Groq API / gpt-oss-120b]
     G -->|Síntese e Minuta de Ação| H[🖥️ Streamlit HITL Dashboard]
     H -->|Revisão e Aprovação do KAM| I[💾 Persistência de Notas & Estágio no CRM]
+```
+
+---
+
+## 📊 Framework de Health Score & Matriz de Estágios
+
+### Algoritmo de Saúde Ponderado
+
+O cálculo do Health Score recalcula os pesos automaticamente caso algum pilar de dados esteja temporariamente indisponível:
+
+> **Health Score** = Soma(Score_pilar * Peso_pilar) / Soma(Pesos_ativos)
+
+| Pilar | Peso | Indicadores Avaliados |
+| :--- | :--- | :--- |
+| 📊 **Telemetria SaaS** | **35%** | Volume de Usuários Ativos (MAU), tendência de engajamento M/M e taxa de adoção de módulos. |
+| 🎧 **Atendimento & Suporte** | **25%** | Quantidade de chamados abertos, tickets críticos sem resolução e violações de SLA no período. |
+| 💼 **Relacionamento CRM** | **20%** | Recorrência do contato, presença de *Executive Sponsor* ativo e saneamento cadastral. |
+| 💳 **Financeiro & Contratual** | **20%** | Adimplência do pagamento de mensalidades e contagem regressiva para a janela de renovação. |
+
+### Matriz de Transição de Estágios (Ciclo de Vida)
+
+* **MODO SETUP (S1 a S4):** Onboarding técnico, saneamento da base e validação inicial de saúde.
+* **MODO OPERAÇÃO (O1 a O4):** Cadência de rotina (O1), entrega de valor (O2), mitigação de Churn (O3) e renovação (O4).
+* **MODO EXPANSÃO (E1 a E4):** Mapeamento de oportunidade (E1), qualificação (E2), proposta (E3) e fechamento (E4).
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+* **Linguagem Principal:** Python 3.10+
+* **Interface & Cockpit:** Streamlit (Padrão Vibecode Executivo)
+* **Inference Engine:** Groq API (`openai/gpt-oss-120b`)
+* **Gestão de Dependências & Segredos:** `python-dotenv` & `.streamlit/secrets.toml`
+* **Arquitetura de Software:** Modular, Orientada a Objetos (POO) e Desacoplada
+
+---
+
+## 📂 Estrutura do Repositório
+
+```text
+coresaas-kam-agent/
+├── .streamlit/
+│   └── secrets.toml              # Chaves e segredos em ambiente de nuvem
+├── connectors/                   # Ingestão de CRM, Suporte, Telemetria e Mercado
+│   ├── crm_connector.py
+│   ├── support_connector.py
+│   ├── telemetry_connector.py
+│   └── market_intelligence_connector.py
+├── engine/                       # Validação determinística e regras de negócio
+│   ├── health_score.py
+│   └── state_machine.py
+├── instructions/                 # Prompt mestre e regras de proveniência
+│   └── core_kam_instruction.md
+├── skills/                       # Playbooks estratégicos em Markdown (.md)
+│   ├── kam-churn-risk.md
+│   ├── kam-expansion-mapping.md
+│   └── kam-market-signals.md
+├── agent_orchestrator.py         # Orquestração de contexto e montagem do prompt
+├── app.py                        # Interface Streamlit Human-in-the-Loop
+├── llm_client.py                 # Cliente de conexão com a API da Groq
+├── main_test.py                  # Testes executáveis via linha de comando
+├── README.md                     # Documentação executiva e técnica
+└── requirements.txt              # Módulos para deploy no Streamlit Cloud
+```
+
+---
+
+## 📄 Licença
+
+Este projeto é disponibilizado sob a licença [MIT](LICENSE) — livre para estudos, adaptações e demonstrações de portfólio.
