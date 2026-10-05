@@ -7,7 +7,7 @@
 
 > **Agente Autônomo B2B de Retenção e Expansão (Key Account Management)**, projetado para monitorar a saúde de contas SaaS, prevenir risco de churn através de travas determinísticas em Python e gerar diagnósticos estratégicos com aprovação humana (Human-in-the-Loop).
 
-Link: https://coresaas-kam-agent.streamlit.app/
+Link: https://coresaas-kam-agent-kn5ezbwuk7uxtz25tao4vv.streamlit.app
 
 ---
 
