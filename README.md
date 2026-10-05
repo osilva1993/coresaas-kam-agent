@@ -7,7 +7,7 @@
 
 > **Agente Autônomo B2B de Retenção e Expansão (Key Account Management)**, projetado para monitorar a saúde de contas SaaS, prevenir risco de churn através de travas determinísticas em Python e gerar diagnósticos estratégicos com aprovação humana (Human-in-the-Loop).
 
-Link: https://coresaas-kam-agent-kn5ezbwuk7uxtz25tao4vv.streamlit.app
+Link: https://coresaas-kam-agent-kn5ezbwuk7uxtz25tao4vv.streamlit.app/
 
 ---
 
@@ -20,15 +20,16 @@ Link: https://coresaas-kam-agent-kn5ezbwuk7uxtz25tao4vv.streamlit.app
 
 ## 🧠 Biblioteca de Skills & Playbooks de Governança
 
-O agente utiliza uma **arquitetura de habilidades desacopladas** em Markdown (`skills/`). Cada módulo funciona como um especialista que orienta o orquestrador na condução de planos de ação específicos:
+O agente utiliza uma **arquitetura de habilidades desacopladas** em Markdown (`skills/`). Cada um dos 6 módulos funciona como um especialista virtual que orienta o orquestrador na condução de planos de ação específicos:
 
 | Skill / Módulo | Função Prática na Conta | Impacto na Retenção e Expansão |
 | :--- | :--- | :--- |
-| 🚨 **Churn Risk Playbook** | Mapeia indicadores de atrito (SLA violado, bugs críticos abertos, queda de MAU e perda de sponsor). | Bloqueia ofertas indevidas, gera plano de mitigação emergencial e alerta o KAM. |
-| 📈 **Expansion Mapping** | Qualifica a conta para Upsell/Cross-sell identificando engajamento alto e adimplência financeira. | Garante abordagens comerciais apenas quando a conta está 100% saudável. |
-| 🌐 **Market Signals Radar** | Monitora eventos externos (mudanças de C-Level/VP, fusões, aquisições e novas rodadas). | Converte movimentações do mercado em ganchos de reaproximação estratégica. |
-| ⚙️ **Health Score Engine** | Aplica algoritmo determinístico ponderado (Telemetria, Suporte, CRM e Financeiro). | Padroniza a métrica de saúde real da conta, eliminando avaliações subjetivas. |
-| 🔒 **State Machine Hard-Lock** | Valida as regras de transição de estágio do CRM em código Python puro. | Impede transições de estágio inválidas e garante governança operacional. |
+| 🚨 **Churn Risk Playbook**<br>`kam-churn-risk.md` | Mapeia indicadores de atrito (SLA violado, bugs críticos abertos, queda de MAU e perda de sponsor). | Bloqueia ofertas indevidas, gera plano de mitigação emergencial e alerta o KAM. |
+| 📈 **Expansion Mapping**<br>`kam-expansion-mapping.md` | Qualifica a conta para Upsell/Cross-sell identificando engajamento alto e adimplência financeira. | Garante abordagens comerciais apenas quando a conta está 100% saudável. |
+| 🌐 **Market Signals Radar**<br>`kam-market-signals.md` | Monitora eventos externos (mudanças de C-Level/VP, fusões, aquisições e novas rodadas de investimento). | Converte movimentações do mercado em ganchos de reaproximação estratégica. |
+| 📡 **Radar da Carteira**<br>`kam-radar-carteira.md` | Monitora a saúde global da carteira de clientes e identifica tendências de risco em lote. | Prioriza contas críticas e otimiza a alocação de tempo e recursos da equipe. |
+| ⚙️ **Setup do Processo**<br>`kam-setup-processo.md` | Estrutura o onboarding técnico, saneamento da base de dados e alinhamento de regras iniciais. | Assegura a ativação correta da conta e previne atritos nas fases iniciais do ciclo. |
+| 💎 **Value Cadence**<br>`kam-value-cadence.md` | Gerencia a cadência periódica de revisões de negócio (QBR), acompanhamento de OKRs e ROI. | Demonstra valor contínuo e consolida a relação com os tomadores de decisão. |
 
 ---
 
@@ -91,27 +92,25 @@ O cálculo do Health Score recalcula os pesos automaticamente caso algum pilar d
 
 ```text
 coresaas-kam-agent/
-├── .streamlit/
-│   └── secrets.toml              # Chaves e segredos em ambiente de nuvem
+├── .devcontainer/                # Configuração de ambiente containerizado
+├── .streamlit/                   # Configurações e segredos da aplicação
 ├── connectors/                   # Ingestão de CRM, Suporte, Telemetria e Mercado
-│   ├── crm_connector.py
-│   ├── support_connector.py
-│   ├── telemetry_connector.py
-│   └── market_intelligence_connector.py
-├── engine/                       # Validação determinística e regras de negócio
-│   ├── health_score.py
-│   └── state_machine.py
-├── instructions/                 # Prompt mestre e regras de proveniência
-│   └── core_kam_instruction.md
-├── skills/                       # Playbooks estratégicos em Markdown (.md)
+├── engine/                       # Validação determinística, Health Score e State Machine
+├── instructions/                 # Prompt mestre e diretrizes de proveniência
+├── skills/                       # Playbooks e módulos de inteligência em Markdown (.md)
 │   ├── kam-churn-risk.md
 │   ├── kam-expansion-mapping.md
-│   └── kam-market-signals.md
+│   ├── kam-market-signals.md
+│   ├── kam-radar-carteira.md
+│   ├── kam-setup-processo.md
+│   └── kam-value-cadence.md
+├── .gitignore                    # Arquivos e diretórios ignorados pelo Git
+├── LICENSE                       # Licença do projeto
+├── README.md                     # Documentação executiva e técnica
 ├── agent_orchestrator.py         # Orquestração de contexto e montagem do prompt
 ├── app.py                        # Interface Streamlit Human-in-the-Loop
 ├── llm_client.py                 # Cliente de conexão com a API da Groq
 ├── main_test.py                  # Testes executáveis via linha de comando
-├── README.md                     # Documentação executiva e técnica
 └── requirements.txt              # Módulos para deploy no Streamlit Cloud
 ```
 
