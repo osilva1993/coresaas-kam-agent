@@ -41,7 +41,7 @@ st.markdown("""
 # ---------------------------------------------------------
 # SIDEBAR - SELEÇÃO DE CLIENTE & STATUS DOS CONECTORES
 # ---------------------------------------------------------
-st.sidebar.title("🛡️️ CoreSaaS KAM")
+st.sidebar.title("🛡 CoreSaaS KAM")
 st.sidebar.markdown("---")
 
 st.sidebar.header("📋 Carteira de Contas")
@@ -152,7 +152,6 @@ with tab_overview:
     st.subheader("📡 Status e Mapeamento Integrado de Fontes de Dados")
     st.caption("Visão estruturada e executiva das informações extraídas automaticamente pelas APIs de conexão.")
 
-    # Grid de Cards dos Conectores (2x2)
     c_left, c_right = st.columns(2)
 
     with c_left:
@@ -249,44 +248,114 @@ with tab_pillars:
                     for k, v in p_val["details"].items():
                         st.write(f"- {k}: `{v}`")
 
-# --- TAB 3: COPILOTO IA & HUMAN IN THE LOOP ---
+# --- TAB 3: COPILOTO IA & HUMAN IN THE LOOP (INTERATIVO) ---
 with tab_agent:
     st.subheader("🤖 Agente Copiloto KAM & Fluxo Human-in-the-Loop")
-    st.caption("A IA gera a proposta estratégica baseando-se estritamente nas travas determinísticas. Você revisa e aprova antes de qualquer escrita no CRM.")
+    st.caption("Interaja continuamente com o Copiloto. O agente refina diagnósticos, analisa e-mails e gera estratégias sob demanda baseando-se no contexto real da conta.")
 
     st.info(f"🎯 **Skill Requerida Identificada pelo Engine:** `{recommendation['action']}`")
 
-    if st.button("🚀 Gerar Diagnóstico & Minuta com IA", type="primary", use_container_width=True):
-        with st.spinner("Conectando ao modelo Groq (openai/gpt-oss-120b) e compilando dados..."):
-            context = AgentOrchestrator.load_context(selected_client_id)
-            user_prompt = AgentOrchestrator.build_llm_prompt(context)
-            system_instruction = context["system_instruction"]
+    # Inicialização do Histórico de Chat por Cliente
+    chat_key = f"chat_history_{selected_client_id}"
+    if chat_key not in st.session_state:
+        st.session_state[chat_key] = []
 
-            llm_response = LLMClient.generate_response(
-                system_instruction=system_instruction,
-                user_prompt=user_prompt
-            )
-            st.session_state["llm_response"] = llm_response
+    # Seção de Botões de Atalhos
+    st.markdown("##### ⚡ Atalhos Rápidos & Sugestões de Requisição:")
+    col_b1, col_b2, col_b3, col_b4 = st.columns(4)
 
-    if "llm_response" in st.session_state:
+    prompt_triggered = None
+
+    with col_b1:
+        if st.button("🚀 Diagnóstico & Minuta Inicial", use_container_width=True, type="primary"):
+            prompt_triggered = "Por favor, gere o diagnóstico estratégico completo e a minuta inicial de comunicação com a conta baseando-se no contexto determinístico."
+
+    with col_b2:
+        if st.button("📝 Tom C-Level / Executivo", use_container_width=True):
+            prompt_triggered = "Reescreva a última proposta/diagnóstico em um tom estritamente executivo, resumido e com foco no ROI para ser apresentado a diretores."
+
+    with col_b3:
+        if st.button("📧 Analisar E-mail de Objeção", use_container_width=True):
+            prompt_triggered = "Simulação: O cliente enviou um e-mail dizendo: 'Estamos revisando nossos custos operacionais deste trimestre e gostaríamos de negociar o valor da renovação'. Como o KAM deve responder mantendo a postura consultiva e o contrato saudável?"
+
+    with col_b4:
+        if st.button("📋 Briefing Pré-Reunião", use_container_width=True):
+            prompt_triggered = "Gere um briefing executivo de 5 tópicos principais para minha próxima reunião com o cliente, destacando o Health Score, pendências e o próximo passo recomendado."
+
+    # Campo de Entrada do Chat Livre
+    user_input = st.chat_input("Digite sua dúvida, solicitação de ajuste ou instrução para o Copiloto KAM...")
+    if user_input:
+        prompt_triggered = user_input
+
+    # Exibição do Histórico da Conversa
+    st.markdown("---")
+    st.markdown("#### 💬 Conversa com o Copiloto KAM")
+
+    if not st.session_state[chat_key]:
+        st.caption("Nenhuma interação ainda nesta conta. Clique em um dos atalhos acima ou digite uma mensagem no chat abaixo para iniciar.")
+
+    for message in st.session_state[chat_key]:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    # Processamento de Novo Prompt
+    if prompt_triggered:
+        st.session_state[chat_key].append({"role": "user", "content": prompt_triggered})
+        with st.chat_message("user"):
+            st.markdown(prompt_triggered)
+
+        with st.chat_message("assistant"):
+            with st.spinner("Copiloto KAM processando dados e consultando o modelo de linguagem..."):
+                context = AgentOrchestrator.load_context(selected_client_id)
+                base_prompt = AgentOrchestrator.build_llm_prompt(context)
+                system_instruction = context["system_instruction"]
+
+                # Monta histórico conversacional para manter o contexto dos turnos anteriores
+                conversation_history = "\n\n".join([
+                    f"{'KAM (Usuário)' if msg['role'] == 'user' else 'Copiloto KAM'}: {msg['content']}"
+                    for msg in st.session_state[chat_key]
+                ])
+
+                full_llm_prompt = f"""
+{base_prompt}
+
+### HISTÓRICO DA CONVERSA CONTINUA NESTA SESSÃO:
+{conversation_history}
+
+Responda mantendo rigorosamente a postura de um especialista KAM, respeitando as travas do engine e aplicando as tags de proveniência de dados ao final das frases ([VALIDADO], [HIPÓTESE] ou [NÃO DITO]).
+"""
+                response = LLMClient.generate_response(
+                    system_instruction=system_instruction,
+                    user_prompt=full_llm_prompt
+                )
+
+                st.markdown(response)
+                st.session_state[chat_key].append({"role": "assistant", "content": response})
+                st.session_state[f"last_response_{selected_client_id}"] = response
+                st.rerun()
+
+    # Seção de Aprovação Human-in-the-Loop (para persistir a resposta mais recente no CRM)
+    if st.session_state[chat_key]:
         st.markdown("---")
-        st.markdown("#### ✏️ Minuta do Diagnóstico & Plano de Ação (Ajustável pelo KAM):")
-        
-        edited_response = st.text_area(
-            "Edite o conteúdo abaixo caso queira ajustar alguma informação antes de registrar no CRM:",
-            value=st.session_state["llm_response"],
-            height=450
-        )
+        with st.expander("✅ **Human-in-the-Loop: Revisar & Registrar Minuta Final no CRM**", expanded=False):
+            latest_reply = st.session_state.get(
+                f"last_response_{selected_client_id}", 
+                st.session_state[chat_key][-1]["content"] if st.session_state[chat_key][-1]["role"] == "assistant" else ""
+            )
+            
+            edited_text = st.text_area(
+                "Ajuste fino da minuta/relatório antes do registro no CRM:",
+                value=latest_reply,
+                height=250
+            )
 
-        col_approve, col_reject = st.columns([1, 4])
-        with col_approve:
-            if st.button("✅ Aprovar & Registrar no CRM", type="primary"):
+            if st.button("💾 Aprovar & Gravar no CRM", type="primary"):
                 note_tag = f"[Radar · KAM Approved]"
                 CRMConnector.add_note(
                     client_id=selected_client_id,
-                    note_text=edited_response[:300] + "... [relatório completo aprovado pelo KAM]",
+                    note_text=edited_text[:300] + "... [relatório completo aprovado via Copiloto KAM]",
                     tag=note_tag
                 )
                 CRMConnector.update_stage(selected_client_id, recommendation["recommended_stage"])
                 st.balloons()
-                st.success("🎉 Diagnóstico aprovado com sucesso! Alteração de estágio e nota registradas no CRM.")
+                st.success(f"🎉 Diagnóstico e notas aprovados com sucesso! Registrado no CRM para a conta {crm_data['company_name']}.")
