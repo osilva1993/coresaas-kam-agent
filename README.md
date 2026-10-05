@@ -9,6 +9,8 @@
 
 Link: https://coresaas-kam-agent-kn5ezbwuk7uxtz25tao4vv.streamlit.app/
 
+> 💡 **Nota de Demonstração:** O link acima refere-se a um ambiente de testes criado exclusivamente para avaliação funcional do projeto. Todos os dados de contas, telemetria, chamados e contatos são **fictícios (mock data)** e foram projetados para simular cenários reais de Key Account Management sem violar privacidade ou sigilo de informações.
+
 ---
 
 ## 💡 O Desafio B2B & A Solução Agêntica
